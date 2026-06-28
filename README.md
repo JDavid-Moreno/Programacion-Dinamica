@@ -100,3 +100,98 @@ Como se ve, el tiempo de ejecución bajo exageradamente, pasando de más de 10 s
 ---
 
 ### Cambio de monedas
+
+Consiste en encontrar la menor cantidad de monedas posible para sumar una cantidad determinada de dinero, utilizando un conjunto de valores de monedas disponibles.
+
+Es decir, si tengo 12 centavos, cuál es la cantidad minima de monedas que necesito para completar esos 12 centavos, no importa la denominación (a menos que sea solicitada) sino únicamente la cantidad.
+
+La manera más sencilla y a la vez la menos eficiente que es usando fuerza bruta, es utilizando recursion de manera que, se busque cuál fue la cantidad minima de monedas de los valores anteriores, los valores a comparar son el valor del monto menos los valores de las monedas.
+
+Por ejemplo, si tengo las monedas de valor $1, 2 $ y $5$, si quiero saber cuál es la cantidad minima de monedas de 6 centavos, reviso los valores que cumplan que sea el monto menos cada tipo de moneda:
+
+$6 - 1 = 5$
+
+$6 - 2 = 4$
+
+$6 - 5 = 1$
+
+Una vez identificados los valores previos, reviso cuál de estos me da la minima cantidad de monedas y a esta cantidad le sumo uno (de la moneda a agregar para llegar al monto deseado), esto se hace de manera recursiva hasta tener los valores previos y asi encontrar el minimo.
+
+```
+def coin_change(amount, coins):
+    if amount == 0:
+        return 0
+    if amount < 0:
+        return float('inf')
+
+    minimum = float('inf')
+    for coin in coins:
+        minimum = min(minimum, coin_change(amount - coin, coins) + 1)
+
+    return minimum
+```
+
+Podemos observar que ya cuenta con los casos bases que si hay 0 monedas, pues ahi 0 formas de hacerlo, asi mismo, el caso donde el monto sea negativo donde revuelve con indeterminado, ya que un monto negativo técnicamente es imposible por lo que no se realiza recursion.
+
+Por otro lado, para encontrar el valor se llama nuevamente a la funcion, sin embargo, con el monto modificado como ya se explicó, esta forma es sumamente lenta, ya que realiza calculos repetitivos varias veces como se ve:
+
+![Coin-Minimum.png](Recursos/Moneda/Coin-Minimum.png)
+
+Donde por ejemplo con 6, se realiza 8 veces el cálculo de 1 centavo, lo cual hace que la complejidad se vaya a $O(m^n)$ siendo $m$ la cantidad de posibles llamadas, en este caso que tenemos 3 valores de monedas, $m = 3 $, por lo que la complejidad es $O(3^n)$ siendo sumamente lento, esto se arregla fácilmente usando programacion dinámica.
+
+Caso con memorización:
+
+```
+def coin_change(amount, coins, memo):
+    if amount in memo:
+        return memo[amount]
+    if amount == 0:
+        return 0
+    if amount < 0:
+        return float('inf')
+
+    minimum = float('inf')
+    for coin in coins:
+        minimum = min(minimum, coin_change(amount - coin, coins, memo) + 1)
+    memo[amount] = minimum
+    return minimum
+```
+
+Usando esta técnica podemos ver a simple vista que es muy parecido al anterior o sea el de fuerza bruta; sin embargo, este cuenta con la diferencia de usar un diccionario, el cual va guardando los resultamos de las cantidades mínimas, esto hace que no se tenga que repetir calculos, haciéndolo sumamente menos compleja, siendo de $O(n * m) = O(n)$.
+
+Caso con tabulación:
+
+```
+def coin_change(coins, amount):
+    if amount < 0:
+        return float('inf')
+    array = [float('inf')] * (amount + 1)
+    array[0] = 0
+
+    for i in range(1, amount + 1):
+        for coin in coins:
+            if coin <= i:
+                array[i] = min(array[i], array[i - coin] + 1)
+
+    return array[amount]
+```
+
+Como tabulación es iterativo, este utiliza dos ciclos `for`, aca creamos una tabla o lista la cual va a ser de tamaño $valor + 1 $, es decir, si el valor es de 6, la lista será de tamaño 7, ya que necesitamos saber los valores de 0 a n. 
+
+Esta lista a diferencia de $fibonacci$ se llena con $inf$ o indeterminado en vez de 0, ya que en caso de hacer una lista de 0 s, esta no servirá, ya que al hacer `min()` siempre será 0.
+
+Por otro lado, los ciclos `for`, uno se encarga de ir recorriendo todos los valoré excepto el 0 el cual ya está agregado desde antes de iterar, hasta el último elemento o sea el valor a encontrar, el otro se encarga de recorrer la lista de monedas dadas para comparar con los valores previos.
+
+Este algoritmo, de igual manera es de complejidad $O(n * m)$, ya que cada ciclo `for` recorre una lista diferente, asi mismo, la lista de monedas que se itera $m$ veces generalemente se da, es decir, el problema nos da de antemano la cantidad de monedas, por lo qeu su complejidad final es de $O(n), $siendo mucho mas eficiente que por fuerza bruta
+
+Tiempo de ejecución con recursividad normal:
+
+![ejecucion-FB.png](Recursos/Moneda/ejecucion-FB.png)
+
+Tiempo de ejecución con Memorización:
+
+![ejecucion-memo.png](Recursos/Moneda/ejecucion-memo.png)
+
+---
+
+### Knapsack (Mochila).
