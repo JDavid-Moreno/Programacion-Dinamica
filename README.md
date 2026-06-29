@@ -97,6 +97,8 @@ Tiempo de ejecución con recursividad normal / Tiempo de ejecución con Tabulaci
 
 Como se ve, el tiempo de ejecución bajo exageradamente, pasando de más de 10 segundos a menos de 1 milisegundo de ejecución.
 
+https://github.com/user-attachments/assets/3e3f5a08-0bbe-4783-a94a-a0b56226e89c
+
 ---
 
 ### Cambio de monedas
