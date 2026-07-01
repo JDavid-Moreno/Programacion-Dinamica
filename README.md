@@ -55,7 +55,7 @@ Cada vez que se llama a la funcion anterior, se repite trabajo, siendo que por e
 
 Aquí es cuando entra la programacion dinámica, que usando cualquiera de sus 2 metodos mejora grandemente la eficiencia del código.
 
-Usando memorización:
+**Usando memorización:**
 
 ```
 def fib(n, memo):
@@ -70,7 +70,7 @@ def fib(n, memo):
 
 Aquí se usa un diccionario global el cual va guardando los resultados de las iteraciones, esto para que al momento de buscar un valor de fibonacci, si ese valor ya se encuentra en el diccionario, este ya no tenga que calcularlo, sino únicamente tomarlo del diccionario y ya, esto acorta mucho la complejidad del algoritmo a $O(n)$.
 
-Usando Tabulación:
+**Usando Tabulación:**
 
 ```
 def fib(n):
@@ -141,7 +141,7 @@ Por otro lado, para encontrar el valor se llama nuevamente a la funcion, sin emb
 
 Donde por ejemplo con 6, se realiza 8 veces el cálculo de 1 centavo, lo cual hace que la complejidad se vaya a $O(m^n)$ siendo $m$ la cantidad de posibles llamadas, en este caso que tenemos 3 valores de monedas, $m = 3 $, por lo que la complejidad es $O(3^n)$ siendo sumamente lento, esto se arregla fácilmente usando programacion dinámica.
 
-Caso con memorización:
+**Caso con memorización:**
 
 ```
 def coin_change(amount, coins, memo):
@@ -161,7 +161,7 @@ def coin_change(amount, coins, memo):
 
 Usando esta técnica podemos ver a simple vista que es muy parecido al anterior o sea el de fuerza bruta; sin embargo, este cuenta con la diferencia de usar un diccionario, el cual va guardando los resultamos de las cantidades mínimas, esto hace que no se tenga que repetir calculos, haciéndolo sumamente menos compleja, siendo de $O(n * m) = O(n)$.
 
-Caso con tabulación:
+**Caso con tabulación:**
 
 ```
 def coin_change(coins, amount):
@@ -184,7 +184,7 @@ Esta lista a diferencia de $fibonacci$ se llena con $inf$ o indeterminado en vez
 
 Por otro lado, los ciclos `for`, uno se encarga de ir recorriendo todos los valoré excepto el 0 el cual ya está agregado desde antes de iterar, hasta el último elemento o sea el valor a encontrar, el otro se encarga de recorrer la lista de monedas dadas para comparar con los valores previos.
 
-Este algoritmo, de igual manera es de complejidad $O(n * m)$, ya que cada ciclo `for` recorre una lista diferente, asi mismo, la lista de monedas que se itera $m$ veces generalemente se da, es decir, el problema nos da de antemano la cantidad de monedas, por lo qeu su complejidad final es de $O(n), $siendo mucho mas eficiente que por fuerza bruta
+Este algoritmo, de igual manera es de complejidad $O(n * m)$, ya que cada ciclo `for` recorre una lista diferente, asi mismo, la lista de monedas que se itera $m$ veces generalmente se da, es decir, el problema nos da de antemano la cantidad de monedas, por lo qeu su complejidad final es de $O(n), $siendo mucho más eficiente que por fuerza bruta
 
 Tiempo de ejecución con recursividad normal:
 
@@ -197,3 +197,100 @@ Tiempo de ejecución con Memorización:
 ---
 
 ### Knapsack (Mochila).
+
+Este problema consiste en que tengo una mochila o maleta, la cual tiene cierta cantidad de espacio para guardar una cantidad $n$ de objetos, cada objeto tiene un cierto valor, la idea es maximizar el valor total que puede llevar la maleta sin sobrepasar la capacidad maxima.
+
+Para cada objeto tenemos 2 posibles opciones: 
+
+1. Dejar el objeto y pasar al siguiente.
+2. Tomar el objeto, sin embargo, ahora tengo menos capacidad en la mochila.
+
+La manera más sencilla de abordar este problema es con recursión:
+
+```
+def backpack(capacity, weights, values, n):
+    if n == 0 or capacity == 0:
+        return 0
+
+    if weights[n - 1] > capacity:
+        return backpack(capacity, weights, values, n - 1)
+
+    return max(backpack(capacity, weights, values, n - 1),
+               values[n - 1] + backpack(capacity - weights[n - 1], weights, values, n - 1))
+```
+
+Primeramente, la variable `n` representa la cantidad de objetos, la cual usaremos para "recorrer" la lista de objetos empezando desde el último hasta el primero.
+
+Una vez con eso en cuenta, lo que hacemos es revisar primero si cada objeto tiene menor o igual a la capacidad actual de la mochila, en caso de que sea más pesado se descarta y se pasa al siguiente objeto.
+
+Por otro lado, en caso de que el objeto pese menos que la capacidad que tenga la mochila, se tiene que buscar el máximo entre ambas opciones, es decir, el que de más valor total entre dejar el objeto y mirar el siguiente, o tomar el objeto y ver los demás objetos pero ahora con menos capacidad.
+
+Este proceso se realiza de manera recursiva hasta recorrer todos los objetos o hasta que la capacidad de la mochila llegue a 0. Hacerlo de esta manera es demasiado lento, ya que su complejidad es de $O(2^n)$, esto debido a que en cada objeto debe preguntarse si tomarlo o no, o sea 2 opciones, y por cada objeto sería aproximadamente:
+$2 * 2 * 2 ...$ asi $n$ veces.
+
+**Caso con memorización:**
+
+```
+def backpack(capacity, weights, values, n, memo):
+    if (capacity, n) in memo:
+        return memo[(capacity, n)]
+
+    if n == 0 or capacity == 0:
+        return 0
+
+    if weights[n - 1] > capacity:
+        result = backpack(capacity, weights, values, n - 1, memo)
+    else:
+        result = max(backpack(capacity, weights, values, n - 1, memo),
+                         values[n - 1] + backpack(capacity - weights[n - 1], weights, values, n - 1, memo))
+
+    memo[(capacity, n)] = result
+    return result
+```
+
+Ahora, usando memorización es prácticamente igual, sin embargo, al usar un diccionario, este se evita de repetir calculos o en este caso posibilidades, esto ayuda a no repetir varias veces las mismas combinaciones de objetos, de esta manera también baja la complejidad a $O(nW)$, donde $W$ representa la capacidad de la mochila y $n$ es la cantidad de objetos, por ende la capacidad al ser insignificante para la complejidad es de $O(n)$.
+
+**Caso con tabulación:**
+
+```
+def backpack(capacity, weights, values, n):
+    array = [[0] * (capacity + 1) for _ in range(n + 1)]
+    for i in range(1, n + 1):
+        for j in range(capacity + 1):
+            if weights[i - 1] <= j:
+                array[i][j] = max(array[i - 1][j], values[i - 1] + array[i - 1][j - weights[i - 1]])
+            else:
+                array[i][j] = array[i - 1][j]
+
+    return array[n][capacity]
+```
+
+En este caso, tabulación es más complejo de entender, pero consiste en lo siguiente:
+
+Primeramente, creamos una matriz o tabla llamada `array` llena de ceros, donde las filas representan la cantidad de objetos disponibles (desde 0 hasta n) y las columnas representan capacidades ficticias de la mochila que van aumentando de uno en uno desde 0 hasta la capacidad máxima real.
+
+Una vez con eso en cuenta, lo que hacemos es utilizar dos ciclos anidados para recorrer cada celda de esta tabla, fila por fila y columna por columna. Para cada celda, revisamos primero si el peso del objeto actual es menor o igual a la capacidad de la columna en la que estamos parados. 
+
+En caso de que sea más pesado y no quepa, copiamos directamente el valor que calculamos en la fila de arriba para esa misma capacidad, ya que no podemos incluir este objeto. Por otro lado, en caso de que el objeto actual sí quepa en la capacidad de la columna, se tiene que buscar el máximo entre ambas opciones. Es decir, comparamos el valor total de dejar el objeto (que consiste simplemente en mirar el resultado de la fila de arriba en esa misma columna) contra el valor de tomar el objeto (que consiste en sumar el valor del objeto actual más el mejor resultado que podíamos obtener en la fila anterior restándole el peso del objeto a la capacidad actual).
+
+Este proceso se realiza de manera iterativa (llenando la tabla de abajo hacia arriba) hasta completar todas las celdas. Al final, el resultado óptimo con todos los objetos considerados y la capacidad total permitida se encontrará guardado en la última celda de la esquina inferior derecha, la cual simplemente devolvemos. 
+
+Hacerlo de esta manera elimina por completo la recursividad y asegura una complejidad de $O(n)$, ya que cada combinación posible se calcula exactamente una sola vez de forma ordenada.
+
+Tiempo de ejecución con recursividad normal:
+
+![mochila-recursiva.png](Recursos/Mochila/mochila-recursiva.png)
+
+Tiempo de ejecución con memorización:
+
+![mochila-memo.png](Recursos/Mochila/mochila-memo.png)
+
+---
+
+## Material adicional
+
+[![Programacion dinamica](https://img.youtube.com/vi/e5zaZEfHsIs/0.jpg)](https://www.youtube.com/watch?v=e5zaZEfHsIs&t=992s)
+
+[![Programacion dinamica](https://img.youtube.com/vi/C240g6_Dsl4/0.jpg)](https://www.youtube.com/watch?v=C240g6_Dsl4)
+
+[![Programacion dinamica](https://img.youtube.com/vi/2C2v2TT1fPc/0.jpg)](https://www.youtube.com/watch?v=2C2v2TT1fPc)
